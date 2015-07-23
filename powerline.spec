@@ -9,16 +9,15 @@ Source0:	https://github.com/powerline/powerline/archive/%{version}/%{name}-%{ver
 URL:		https://github.com/powerline/powerline
 BuildRequires:	fontconfig
 BuildRequires:	python-setuptools
+BuildRequires:	rpm-pythonprov
 BuildRequires:	sed >= 4.0
 BuildRequires:	sphinx-pdg
-BuildRequires:	tmux
-BuildRequires:	vim
 Requires:	fontconfig
 Requires:	python
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-Powerline is a status-line plugin for vim, and provides status-lines
+Powerline is a status-line plugin for Vim, and provides status-lines
 and prompts for several other applications, including zsh, bash, tmux,
 IPython, Awesome and Qtile.
 
