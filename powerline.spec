@@ -1,7 +1,7 @@
 Summary:	The ultimate status-line/prompt utility
 Name:		powerline
 Version:	2.1.4
-Release:	0.1
+Release:	0.2
 License:	MIT
 Group:		Applications/System
 Source0:	https://github.com/powerline/powerline/archive/%{version}/%{name}-%{version}.tar.gz
@@ -66,25 +66,28 @@ sed -i -e "/DEFAULT_SYSTEM_CONFIG_DIR/ s@None@'%{_sysconfdir}/xdg'@" powerline/c
 sed -i -e "/TMUX_CONFIG_DIRECTORY/ s@BINDINGS_DIRECTORY@'/usr/share'@" powerline/config.py
 
 %build
-# nothing to build
-
-%install
-rm -rf $RPM_BUILD_ROOT
-
-
-CFLAGS="%{optflags}" \
-python setup.py install --prefix=%{_prefix} --root=$RPM_BUILD_ROOT --optimize=1
+CC="%{__cc}" \
+CFLAGS="%{rpmcppflags} %{rpmcflags}" \
+%{__python} setup.py build
 
 # build docs
 cd docs
-%__make html SPHINXBUILD=%{_bindir}/sphinx-build
+%{__make} html \
+	SPHINXBUILD=%{_bindir}/sphinx-build
 rm _build/html/.buildinfo
 # A structure gets initialized while building the docs with os.environ.
 # This works around an rpmlint error with the build dir being in a file.
 sed -i -e 's/abuild/user/g' _build/html/develop/extensions.html
 
-%__make man SPHINXBUILD=%{_bindir}/sphinx-build
-cd -
+%{__make} man \
+	SPHINXBUILD=%{_bindir}/sphinx-build
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%{__python} setup.py install \
+	--skip-build \
+	--optimize=2 \
+	--root=$RPM_BUILD_ROOT
 
 # config
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/xdg/%{name}
