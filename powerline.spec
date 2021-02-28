@@ -24,9 +24,7 @@ IPython, Awesome and Qtile.
 %package docs
 Summary:	Powerline Documentation
 Group:		Documentation
-%if "%{_rpmversion}" >= "5"
 BuildArch:	noarch
-%endif
 
 %description docs
 This package provides the powerline documentation.
@@ -36,9 +34,7 @@ Summary:	Powerline VIM plugin
 Group:		Applications/Editors/Vim
 Requires:	%{name} = %{version}-%{release}
 Requires:	vim
-%if "%{_rpmversion}" >= "5"
 BuildArch:	noarch
-%endif
 
 %description -n vim-plugin-powerline
 Powerline is a status-line plugin for vim, and provides status-lines
@@ -49,9 +45,7 @@ Summary:	Powerline for tmux
 Group:		Applications/System
 Requires:	%{name} = %{version}-%{release}
 Requires:	tmux
-%if "%{_rpmversion}" >= "5"
 BuildArch:	noarch
-%endif
 
 %description -n tmux-powerline
 Powerline for tmux.
