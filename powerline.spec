@@ -1,19 +1,21 @@
 Summary:	The ultimate status-line/prompt utility
 Name:		powerline
-Version:	2.1.4
-Release:	0.2
+Version:	2.8.2
+Release:	1
 License:	MIT
 Group:		Applications/System
 Source0:	https://github.com/powerline/powerline/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	c3663676cf24fb738a0dd09d95159ba5
+# Source0-md5:	2337d2f226b31e163aa752ce22aa532a
 URL:		https://github.com/powerline/powerline
 BuildRequires:	fontconfig
-BuildRequires:	python-setuptools
+BuildRequires:	python3-psutil
+BuildRequires:	python3-setuptools
 BuildRequires:	rpm-pythonprov
 BuildRequires:	sed >= 4.0
 BuildRequires:	sphinx-pdg
 Requires:	fontconfig
-Requires:	python
+Requires:	python3
+Requires:	python3-psutil
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -52,16 +54,26 @@ Powerline for tmux.
 
 Add to your ~/.tmux.conf file: "source /usr/share/tmux/powerline.conf"
 
+%post
+%systemd_post powerline.service
+
+%preun
+%systemd_preun powerline.service
+
+%postun
+%systemd_reload
+
 %prep
 %setup -q
 
 sed -i -e "/DEFAULT_SYSTEM_CONFIG_DIR/ s@None@'%{_sysconfdir}/xdg'@" powerline/config.py
 sed -i -e "/TMUX_CONFIG_DIRECTORY/ s@BINDINGS_DIRECTORY@'/usr/share'@" powerline/config.py
 
+# Change shebang in all relevant files in this directory and all subdirectories
+find -type f -exec sed -i '1s=^#!%{_bindir}/\(python\|env python\)[23]\?=#!%{__python3}=' {} +
+
 %build
-CC="%{__cc}" \
-CFLAGS="%{rpmcppflags} %{rpmcflags}" \
-%{__python} setup.py build
+%py3_build
 
 # build docs
 cd docs
@@ -77,10 +89,7 @@ sed -i -e 's/abuild/user/g' _build/html/develop/extensions.html
 
 %install
 rm -rf $RPM_BUILD_ROOT
-%{__python} setup.py install \
-	--skip-build \
-	--optimize=2 \
-	--root=$RPM_BUILD_ROOT
+%py3_install
 
 # config
 install -d $RPM_BUILD_ROOT%{_sysconfdir}/xdg/%{name}
@@ -104,57 +113,64 @@ done
 
 # awesome
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/awesome/
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/awesome/powerline.lua $RPM_BUILD_ROOT%{_datadir}/%{name}/awesome/
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/awesome/powerline-awesome.py $RPM_BUILD_ROOT%{_datadir}/%{name}/awesome/
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/awesome/powerline.lua $RPM_BUILD_ROOT%{_datadir}/%{name}/awesome/
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/awesome/powerline-awesome.py $RPM_BUILD_ROOT%{_datadir}/%{name}/awesome/
 
 # bash bindings
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/bash
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/bash/powerline.sh $RPM_BUILD_ROOT%{_datadir}/%{name}/bash/
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/bash/powerline.sh $RPM_BUILD_ROOT%{_datadir}/%{name}/bash/
 
 # fish
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/fish
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/fish/powerline-setup.fish $RPM_BUILD_ROOT%{_datadir}/%{name}/fish
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/fish/powerline-setup.fish $RPM_BUILD_ROOT%{_datadir}/%{name}/fish
 
 # i3
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/i3
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/i3/powerline-i3.py $RPM_BUILD_ROOT%{_datadir}/%{name}/i3
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/i3/powerline-i3.py $RPM_BUILD_ROOT%{_datadir}/%{name}/i3
 
 # ipython
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/ipython
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/ipython/post_0_11.py $RPM_BUILD_ROOT%{_datadir}/%{name}/ipython
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/ipython/pre_0_11.py $RPM_BUILD_ROOT%{_datadir}/%{name}/ipython
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/ipython/post_0_11.py $RPM_BUILD_ROOT%{_datadir}/%{name}/ipython
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/ipython/pre_0_11.py $RPM_BUILD_ROOT%{_datadir}/%{name}/ipython
 
 # qtile
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/qtile
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/qtile/widget.py $RPM_BUILD_ROOT%{_datadir}/%{name}/qtile
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/qtile/widget.py $RPM_BUILD_ROOT%{_datadir}/%{name}/qtile
 
 # shell bindings
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/shell
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/shell/powerline.sh $RPM_BUILD_ROOT%{_datadir}/%{name}/shell/
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/shell/powerline.sh $RPM_BUILD_ROOT%{_datadir}/%{name}/shell/
 
 # tcsh
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/tcsh
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/tcsh/powerline.tcsh $RPM_BUILD_ROOT%{_datadir}/%{name}/tcsh
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/tcsh/powerline.tcsh $RPM_BUILD_ROOT%{_datadir}/%{name}/tcsh
 
 # tmux plugin
 install -d $RPM_BUILD_ROOT%{_datadir}/tmux
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/tmux/powerline*.conf $RPM_BUILD_ROOT%{_datadir}/tmux/
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/tmux/powerline*.conf $RPM_BUILD_ROOT%{_datadir}/tmux/
 
 # vim plugin
 install -d $RPM_BUILD_ROOT%{_datadir}/vim/site/plugin/
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/vim/plugin/powerline.vim $RPM_BUILD_ROOT%{_datadir}/vim/site/plugin/powerline.vim
-rm -rf $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/vim/plugin
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/vim/plugin/powerline.vim $RPM_BUILD_ROOT%{_datadir}/vim/site/plugin/powerline.vim
+rm -rf $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/vim/plugin
 install -d $RPM_BUILD_ROOT%{_datadir}/vim/site/autoload/powerline
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/vim/autoload/powerline/debug.vim $RPM_BUILD_ROOT%{_datadir}/vim/site/autoload/powerline/debug.vim
-rm -rf $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/vim/autoload
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/vim/autoload/powerline/debug.vim $RPM_BUILD_ROOT%{_datadir}/vim/site/autoload/powerline/debug.vim
+rm -rf $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/vim/autoload
 
 # zsh
 install -d $RPM_BUILD_ROOT%{_datadir}/%{name}/zsh
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/zsh/__init__.py $RPM_BUILD_ROOT%{_datadir}/%{name}/zsh
-mv $RPM_BUILD_ROOT%{py_sitescriptdir}/powerline/bindings/zsh/powerline.zsh $RPM_BUILD_ROOT%{_datadir}/%{name}/zsh
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/zsh/__init__.py $RPM_BUILD_ROOT%{_datadir}/%{name}/zsh
+mv $RPM_BUILD_ROOT%{py3_sitescriptdir}/powerline/bindings/zsh/powerline.zsh $RPM_BUILD_ROOT%{_datadir}/%{name}/zsh
+
+# systemd
+#rm -f $RPM_BUILD_ROOT%{powerline_python_sitelib}/powerline/dist/systemd/powerline-daemon.service
+install -d $RPM_BUILD_ROOT%{systemdunitdir}
+cp -p powerline/dist/systemd/powerline-daemon.service $RPM_BUILD_ROOT%{systemdunitdir}/powerline.service
+install -d $RPM_BUILD_ROOT%{_sbindir}
+ln -s %{_sbindir}/service $RPM_BUILD_ROOT%{_sbindir}/rcpowerline
 
 # cleanup
-rm -r $RPM_BUILD_ROOT%{py_sitescriptdir}/%{name}/config_files
+rm -r $RPM_BUILD_ROOT%{py3_sitescriptdir}/%{name}/config_files
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -164,6 +180,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc LICENSE README.rst
 %{_sysconfdir}/fonts/conf.d/10-powerline-symbols.conf
 %config(noreplace) %{_sysconfdir}/xdg/%{name}
+%{systemdunitdir}/powerline.service
+%attr(755,root,root) %{_sbindir}/rcpowerline
 %attr(755,root,root) %{_bindir}/powerline
 %attr(755,root,root) %{_bindir}/powerline-config
 %attr(755,root,root) %{_bindir}/powerline-daemon
@@ -198,7 +216,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/%{name}/zsh
 %{_datadir}/%{name}/zsh/__init__.py*
 %{_datadir}/%{name}/zsh/powerline.zsh
-%{py_sitescriptdir}/*
+%{py3_sitescriptdir}/*
 
 %files docs
 %defattr(644,root,root,755)
