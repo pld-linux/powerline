@@ -171,6 +171,7 @@ ln -s %{_sbindir}/service $RPM_BUILD_ROOT%{_sbindir}/rcpowerline
 
 # cleanup
 rm -r $RPM_BUILD_ROOT%{py3_sitescriptdir}/%{name}/config_files
+find $RPM_BUILD_ROOT%{py3_sitescriptdir}/%{name}/bindings -name "*.py[a-z]" -delete
 
 %clean
 rm -rf $RPM_BUILD_ROOT
