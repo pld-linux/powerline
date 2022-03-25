@@ -1,7 +1,7 @@
 Summary:	The ultimate status-line/prompt utility
 Name:		powerline
 Version:	2.8.2
-Release:	1
+Release:	2
 License:	MIT
 Group:		Applications/System
 Source0:	https://github.com/powerline/powerline/archive/%{version}/%{name}-%{version}.tar.gz
