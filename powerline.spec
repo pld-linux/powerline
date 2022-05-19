@@ -1,11 +1,11 @@
 Summary:	The ultimate status-line/prompt utility
 Name:		powerline
-Version:	2.8.2
-Release:	3
+Version:	2.8.3
+Release:	1
 License:	MIT
 Group:		Applications/System
 Source0:	https://github.com/powerline/powerline/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	2337d2f226b31e163aa752ce22aa532a
+# Source0-md5:	d524df603bf7144cc2ccd5dcbfc5e982
 URL:		https://github.com/powerline/powerline
 BuildRequires:	fontconfig
 BuildRequires:	python3-psutil
